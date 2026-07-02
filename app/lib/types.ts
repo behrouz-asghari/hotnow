@@ -42,14 +42,6 @@ export interface AnalysisOutput {
 
 export type SourceName = "google" | "wiki" | "ninisite" | "karzar" | "digikala";
 
-export interface RawTrendItem {
-  title: string;
-  source: SourceName;
-  timestamp?: string | number;
-  traffic?: number;
-  views?: number;
-  score?: number;
-}
 
 
 
