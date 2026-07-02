@@ -40,7 +40,7 @@ export default function AnalysisPanel({
 
       <ReportSection title="📊 تحلیل کلی ترندها" content={generalReport} />
       <ReportSection title="👩 تحلیل اجتماعی زنان" content={womenSocialReport} isEmpty={isWomenEmpty} />
-      <ReportSection title="🛒 تحلیل اقتصا و اجتماعی بازار" content={marketReport} isEmpty={isMarketEmpty} />
+      <ReportSection title="🛒 تحلیل اقتصادی و رفتار بازار" content={marketReport} isEmpty={isMarketEmpty} />
     </section>
   );
 }
