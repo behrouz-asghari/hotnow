@@ -63,25 +63,25 @@ export default async function Page() {
    <header className="flex items-center justify-between">
         <h1 className="text-2xl font-extrabold">🔥 داشبورد AI ترندها</h1>
            <span className="text-xs text-gray-500">
-          {data.generatedAt
+          {data?.generatedAt
             ? `بروزرسانی: ${new Date(data.generatedAt).toLocaleString("fa-IR")}`
             : "زمان نامشخص"}
         </span>
       </header>
 
         <StatCards
-        fear={data.sentiment?.fear ?? 0}
-        excitement={data.sentiment?.excitement ?? 0}
-        crisis={data.sentiment?.crisis ?? 0}
-        sexualSignal={data.sentiment?.sexualSignal ?? 0}
-        polarity={data.sentiment?.polarity ?? 0}
-        politicalTension={data.sentiment?.politicalTension ?? 0}
+        fear={data?.sentiment?.fear ?? 0}
+        excitement={data?.sentiment?.excitement ?? 0}
+        crisis={data?.sentiment?.crisis ?? 0}
+        sexualSignal={data?.sentiment?.sexualSignal ?? 0}
+        polarity={data?.sentiment?.polarity ?? 0}
+        politicalTension={data?.sentiment?.politicalTension ?? 0}
       />
 
       <AnalysisPanel
-        generalReport={data.reports?.generalReport || "تحلیلی دریافت نشد."}
-        womenSocialReport={data.reports?.womenSocialReport || "داده‌های اجتماعی در دسترس نیست."}
-        marketReport={data.reports?.marketReport || "داده‌های بازار در دسترس نیست."}
+        generalReport={data?.reports?.generalReport || "تحلیلی دریافت نشد."}
+        womenSocialReport={data?.reports?.womenSocialReport || "داده‌های اجتماعی در دسترس نیست."}
+        marketReport={data?.reports?.marketReport || "داده‌های بازار در دسترس نیست."}
       />
 
       {/* <TrendsTable items={data.items} labels={data.labels} /> */}
