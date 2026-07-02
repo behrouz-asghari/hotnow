@@ -12,36 +12,45 @@ function parsePersianInt(text: string): number {
 }
 
 export async function fetchNiniSiteHottest(): Promise<RawTrendItem[]> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), 9000);
+
   try {
     const response = await fetch("https://www.ninisite.com/discussion/topics/hottest", {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)", // گاهی اوقات هویت بات گوگل بهتر جواب می‌دهد
+      },
       next: { revalidate: 3600 },
+      signal: controller.signal,
     });
+
+    clearTimeout(id);
+    if (!response.ok) return [];
+
     const html = await response.text();
+    if (!html || html.length < 500) return []; // چک کردن برای جلوگیری از پارس کردن صفحات خالی بلاک شده
+
     const $ = cheerio.load(html);
     const items: RawTrendItem[] = [];
 
     $(".category--item").each((_, el) => {
       const title = $(el).find(".topic_subject").text().trim();
       const replyCount = parsePersianInt($(el).find(".topic_number").first().text());
-      const lastDate = $(el).find(".last-topic-date").text().trim();
-
       if (title) {
         items.push({
-          title: `${title} (${lastDate})`,
+          title,
           source: "ninisite",
-          // استفاده از تعداد نظرات به عنوان امتیاز (وزن‌دهی)
-          score: replyCount > 0 ? replyCount : 50,
+          score: replyCount || 50,
           timestamp: Date.now(),
         });
       }
     });
-
     return items;
   } catch (error) {
-    console.error("NiniSite Scrape Error:", error);
     return [];
   }
 }
+
 
 export async function fetchKarzarTop(): Promise<RawTrendItem[]> {
   try {

@@ -13,57 +13,48 @@ function extractProducts(json: AnyRecord): AnyRecord[] {
 }
 
 export async function fetchDigikalaBestSelling(): Promise<RawTrendItem[]> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), 8000); // 8 ثانیه تایم‌اوت
+
   try {
     const res = await fetch("https://api.digikala.com/v1/best-selling/", {
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-        Accept: "application/json, text/plain, */*",
-        "Accept-Language": "fa-IR,fa;q=0.9,en;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json",
+        "Referer": "https://www.digikala.com/",
       },
       next: { revalidate: 3600 },
+      signal: controller.signal,
     });
 
-    if (!res.ok) {
-      throw new Error(`Digikala HTTP ${res.status}`);
-    }
+    clearTimeout(id);
+
+    if (!res.ok) return []; // اگر بلاک بود یا 403 داد، سریع برمی‌گردیم
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) return [];
 
     const json = await res.json();
     const products = extractProducts(json);
 
     const items: RawTrendItem[] = [];
-
     for (const product of products) {
-      const title =
-        product?.title_fa?.trim() ||
-        product?.title_en?.trim() ||
-        "";
-
+      const title = product?.title_fa?.trim() || product?.title_en?.trim() || "";
       if (!title) continue;
-
-      const ordersCount = safeNumber(product?.statistics?.orders_count, 0);
-      const ratingCount = safeNumber(product?.rating?.count, 0);
-      const ratingRate = safeNumber(product?.rating?.rate, 0);
 
       items.push({
         title,
         source: "digikala",
-        score:
-          ordersCount > 0
-            ? ordersCount
-            : ratingCount > 0
-            ? ratingCount
-            : Math.round(ratingRate * 20) || 1,
+        score: safeNumber(product?.statistics?.orders_count, 1),
         timestamp: Date.now(),
       });
     }
-
     return dedupeByTitle(items);
   } catch (error) {
-    console.error("Digikala Best Selling Error:", error);
     return [];
   }
 }
+
 
 function dedupeByTitle(items: RawTrendItem[]): RawTrendItem[] {
   const map = new Map<string, RawTrendItem>();

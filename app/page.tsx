@@ -59,38 +59,41 @@ async function getAnalysis(): Promise<AnalyzeResponse | null> {
 export default async function Page() {
   const data = await getAnalysis();
 
-  if (!data) {
+
+if (!data) {
     return (
       <main className="max-w-6xl mx-auto p-6">
-        <div className="bg-white border rounded-xl p-6 text-center text-gray-500">
-          خطا در دریافت تحلیل. لطفاً دوباره تلاش کنید.
+        <div className="bg-red-50 border border-red-200 rounded-xl p-10 text-center text-red-600">
+          <p className="font-bold">⚠️ سرویس موقتاً در دسترس نیست</p>
+          <p className="text-sm mt-2">قادر به دریافت تحلیل از سرور نیستیم. لطفاً دقایقی دیگر تلاش کنید.</p>
         </div>
       </main>
     );
   }
-
   return (
     <main className="max-w-6xl mx-auto p-6 space-y-6">
    <header className="flex items-center justify-between">
         <h1 className="text-2xl font-extrabold">🔥 داشبورد AI ترندها</h1>
-        <span className="text-xs text-gray-500">
-          بروزرسانی: {new Date(data.generatedAt).toLocaleString("fa-IR")}
+           <span className="text-xs text-gray-500">
+          {data.generatedAt
+            ? `بروزرسانی: ${new Date(data.generatedAt).toLocaleString("fa-IR")}`
+            : "زمان نامشخص"}
         </span>
       </header>
 
-      <StatCards
-        fear={data.sentiment.fear}
-        excitement={data.sentiment.excitement}
-        crisis={data.sentiment.crisis}
-        sexualSignal={data.sentiment.sexualSignal}
-        polarity={data.sentiment.polarity}
-        politicalTension={data.sentiment.politicalTension}
+        <StatCards
+        fear={data.sentiment?.fear ?? 0}
+        excitement={data.sentiment?.excitement ?? 0}
+        crisis={data.sentiment?.crisis ?? 0}
+        sexualSignal={data.sentiment?.sexualSignal ?? 0}
+        polarity={data.sentiment?.polarity ?? 0}
+        politicalTension={data.sentiment?.politicalTension ?? 0}
       />
 
       <AnalysisPanel
-        generalReport={data.reports.generalReport}
-        womenSocialReport={data.reports.womenSocialReport}
-        marketReport={data.reports.marketReport}
+        generalReport={data.reports?.generalReport || "تحلیلی دریافت نشد."}
+        womenSocialReport={data.reports?.womenSocialReport || "داده‌های اجتماعی در دسترس نیست."}
+        marketReport={data.reports?.marketReport || "داده‌های بازار در دسترس نیست."}
       />
 
       {/* <TrendsTable items={data.items} labels={data.labels} /> */}

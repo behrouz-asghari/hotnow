@@ -8,12 +8,12 @@ type Props = {
 };
 
 export default function StatCards({
-  fear,
-  excitement,
-  crisis,
-  sexualSignal,
-  politicalTension,
-  polarity,
+  fear = 0,
+  excitement = 0,
+  crisis = 0,
+  sexualSignal = 0,
+  politicalTension = 0,
+  polarity = 0,
 }: Props) {
 
   return (
