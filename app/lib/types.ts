@@ -116,3 +116,47 @@ export type SafeResult<T> = {
   error?: string;
   status: SourceStatus;
 };
+
+export type Item = {
+  id: string;
+  title: string;
+  source: SourceName;
+  clusterId: number;
+  weight: number;
+};
+
+export type AnalyzeResponse = {
+  generatedAt: string;
+  items: Array<{
+    id: string;
+    title: string;
+    source: SourceName;
+    clusterId: number;
+    weight: number;
+  }>;
+  sentiment: {
+    fear: number;
+    excitement: number;
+    crisis: number;
+    sexualSignal: number;
+    politicalTension?: number;
+    polarity?: number;
+  };
+  forecast: {
+    direction: "up" | "flat" | "down";
+    confidence: number;
+  };
+  labels: Record<number, string>;
+  reports: {
+    generalReport: string;
+    womenSocialReport: string;
+    marketReport: string;
+  };
+  sourceBreakdown?: {
+    google: number;
+    wiki: number;
+    ninisite: number;
+    karzar: number;
+    digikala: number;
+  };
+};

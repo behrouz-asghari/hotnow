@@ -1,56 +1,44 @@
 import AnalysisPanel from "./components/AnalysisPanel";
 import StatCards from "./components/StatCards";
+import { AnalyzeResponse } from "./lib/types";
 
-type SourceName =
-  | "google"
-  | "wiki"
-  | "ninisite"
-  | "karzar"
-  | "digikala";
 
-type AnalyzeResponse = {
-  generatedAt: string;
-  items: Array<{
-    id: string;
-    title: string;
-    source: SourceName;
-    clusterId: number;
-    weight: number;
-  }>;
-  sentiment: {
-    fear: number;
-    excitement: number;
-    crisis: number;
-    sexualSignal: number;
-    politicalTension?: number;
-    polarity?: number;
-  };
-  forecast: {
-    direction: "up" | "flat" | "down";
-    confidence: number;
-  };
-  labels: Record<number, string>;
-  reports: {
-    generalReport: string;
-    womenSocialReport: string;
-    marketReport: string;
-  };
-  sourceBreakdown?: {
-    google: number;
-    wiki: number;
-    ninisite: number;
-    karzar: number;
-    digikala: number;
-  };
-};
 
 async function getAnalysis(): Promise<AnalyzeResponse | null> {
   try {
-    const base =
-      process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    const res = await fetch(`${base}/api/analyze`, { cache: "no-store" });
+    const res = await fetch("/api/analyze", {
+      cache: "no-store",
+      // next: { revalidate: 0 } // اختیاری
+    });
+
     if (!res.ok) return null;
-    return res.json();
+
+    const data = (await res.json()) as Partial<AnalyzeResponse>;
+
+    // schema-safe fallback
+    return {
+      generatedAt: data.generatedAt ?? new Date().toISOString(),
+      items: Array.isArray(data.items) ? (data.items as any) : [],
+      sentiment: {
+        fear: data.sentiment?.fear ?? 0,
+        excitement: data.sentiment?.excitement ?? 0,
+        crisis: data.sentiment?.crisis ?? 0,
+        sexualSignal: data.sentiment?.sexualSignal ?? 0,
+        politicalTension: data.sentiment?.politicalTension ?? 0,
+        polarity: data.sentiment?.polarity ?? 0,
+      },
+      forecast: {
+        direction: data.forecast?.direction ?? "flat",
+        confidence: data.forecast?.confidence ?? 0,
+      },
+      labels: data.labels ?? {},
+      reports: {
+        generalReport: data.reports?.generalReport || "تحلیلی دریافت نشد.",
+        womenSocialReport:
+          data.reports?.womenSocialReport || "داده‌های اجتماعی در دسترس نیست.",
+        marketReport: data.reports?.marketReport || "داده‌های بازار در دسترس نیست.",
+      },
+    };
   } catch {
     return null;
   }
