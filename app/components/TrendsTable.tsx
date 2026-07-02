@@ -2,7 +2,6 @@ type SourceName =
   | "google"
   | "wiki"
   | "ninisite"
-  | "karzar"
   | "digikala";
 
 type Item = {
@@ -33,10 +32,6 @@ const sourceMap: Record<
   ninisite: {
     label: "نی‌نی‌سایت",
     className: "bg-pink-50 text-pink-700",
-  },
-  karzar: {
-    label: "کارزار",
-    className: "bg-green-50 text-green-700",
   },
   digikala: {
     label: "دیجی‌کالا",

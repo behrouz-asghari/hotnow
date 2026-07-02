@@ -13,7 +13,6 @@ import { normalizeAndFuse } from "@/app/lib/fusion/mergeSignals";
 import { fetchDigikalaBestSelling } from "@/app/lib/sources/digikala";
 import { fetchGoogleTrendsIR } from "@/app/lib/sources/googleTrends";
 import {
-  fetchKarzarTop,
   fetchNiniSiteHottest,
 } from "@/app/lib/sources/webScrapers";
 import { fetchWikiTopFa } from "@/app/lib/sources/wikiTop";
@@ -39,7 +38,6 @@ export type AnalysisProgressPayload = {
     google: SourceStatus;
     wiki: SourceStatus;
     ninisite: SourceStatus;
-    karzar: SourceStatus;
     digikala: SourceStatus;
   };
 };
@@ -59,7 +57,6 @@ export type AnalysisResult = {
     google: number;
     wiki: number;
     ninisite: number;
-    karzar: number;
     digikala: number;
   };
 };
@@ -77,7 +74,6 @@ export async function runAnalysis(
     google: "pending",
     wiki: "pending",
     ninisite: "pending",
-    karzar: "pending",
     digikala: "pending",
   };
 
@@ -102,7 +98,6 @@ export async function runAnalysis(
         google: "running",
         wiki: "running",
         ninisite: "running",
-        karzar: "running",
         digikala: "running",
       },
     });
@@ -111,11 +106,10 @@ export async function runAnalysis(
       fetchGoogleTrendsIR(),
       fetchWikiTopFa(),
       fetchNiniSiteHottest(),
-      fetchKarzarTop(),
       fetchDigikalaBestSelling(),
     ]);
 
-    const [googleResult, wikiResult, ninisiteResult, karzarResult, digikalaResult] =
+    const [googleResult, wikiResult, ninisiteResult, digikalaResult] =
       results;
 
     const google =
@@ -123,8 +117,7 @@ export async function runAnalysis(
     const wiki = wikiResult.status === "fulfilled" ? wikiResult.value : [];
     const ninisite =
       ninisiteResult.status === "fulfilled" ? ninisiteResult.value : [];
-    const karzar =
-      karzarResult.status === "fulfilled" ? karzarResult.value : [];
+
     const digikala =
       digikalaResult.status === "fulfilled" ? digikalaResult.value : [];
 
@@ -136,7 +129,6 @@ export async function runAnalysis(
         google: googleResult.status === "fulfilled" ? "done" : "error",
         wiki: wikiResult.status === "fulfilled" ? "done" : "error",
         ninisite: ninisiteResult.status === "fulfilled" ? "done" : "error",
-        karzar: karzarResult.status === "fulfilled" ? "done" : "error",
         digikala: digikalaResult.status === "fulfilled" ? "done" : "error",
       },
     });
@@ -147,7 +139,7 @@ export async function runAnalysis(
       message: "در حال ادغام و نرمال‌سازی داده‌ها",
     });
 
-    const allItems = [...google, ...wiki, ...ninisite, ...karzar, ...digikala];
+    const allItems = [...google, ...wiki, ...ninisite, ...digikala];
     const fused = normalizeAndFuse(allItems);
 
     emit({
@@ -232,7 +224,7 @@ export async function runAnalysis(
         google: google.length,
         wiki: wiki.length,
         ninisite: ninisite.length,
-        karzar: karzar.length,
+
         digikala: digikala.length,
       },
     };
@@ -245,7 +237,6 @@ export async function runAnalysis(
         google: googleResult.status === "fulfilled" ? "done" : "error",
         wiki: wikiResult.status === "fulfilled" ? "done" : "error",
         ninisite: ninisiteResult.status === "fulfilled" ? "done" : "error",
-        karzar: karzarResult.status === "fulfilled" ? "done" : "error",
         digikala: digikalaResult.status === "fulfilled" ? "done" : "error",
       },
     });

@@ -21,7 +21,6 @@ type AnalysisResult = {
     google: number;
     wiki: number;
     ninisite: number;
-    karzar: number;
     digikala: number;
   };
 };
@@ -49,7 +48,6 @@ type AnalysisJobResponse = {
     google: SourceStatus;
     wiki: SourceStatus;
     ninisite: SourceStatus;
-    karzar: SourceStatus;
     digikala: SourceStatus;
   };
 };
