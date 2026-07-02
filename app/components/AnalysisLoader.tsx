@@ -3,66 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import StatCards from "./StatCards";
 import AnalysisPanel from "./AnalysisPanel";
+import { AnalysisJobResponse, SourceStatus, stepLabels } from "../lib/types";
 
-type SourceStatus = "pending" | "running" | "done" | "error";
 
-type AnalysisResult = {
-  generatedAt: string;
-  items: any[];
-  labels: any;
-  sentiment: any;
-  forecast: any;
-  reports: {
-    generalReport: string;
-    womenSocialReport: string;
-    marketReport: string;
-  };
-  sourceBreakdown: {
-    google: number;
-    wiki: number;
-    ninisite: number;
-    digikala: number;
-  };
-};
-
-type AnalysisJobResponse = {
-  id: string;
-  status: "queued" | "running" | "done" | "error";
-  progress: number;
-  step:
-    | "starting"
-    | "fetching_sources"
-    | "fusing_data"
-    | "clustering"
-    | "sentiment_forecast"
-    | "building_prompts"
-    | "generating_reports"
-    | "completed"
-    | "failed";
-  message: string;
-  data: AnalysisResult | null;
-  error: string | null;
-  createdAt: string;
-  updatedAt: string;
-  sources?: {
-    google: SourceStatus;
-    wiki: SourceStatus;
-    ninisite: SourceStatus;
-    digikala: SourceStatus;
-  };
-};
-
-const stepLabels: Record<AnalysisJobResponse["step"], string> = {
-  starting: "شروع تحلیل",
-  fetching_sources: "دریافت داده از منابع",
-  fusing_data: "ادغام و نرمال‌سازی",
-  clustering: "خوشه‌بندی و برچسب‌گذاری",
-  sentiment_forecast: "تحلیل احساسات و پیش‌بینی",
-  building_prompts: "آماده‌سازی پرامپت‌ها",
-  generating_reports: "تولید گزارش نهایی",
-  completed: "تکمیل شد",
-  failed: "خطا",
-};
 
 export default function AnalysisLoader() {
   const [jobId, setJobId] = useState<string | null>(null);
@@ -257,10 +200,8 @@ export default function AnalysisLoader() {
               >
                 <span className="font-medium capitalize text-gray-700">{name}</span>
                 <span className="text-sm text-gray-700">
-                  {status === "done"
+                  {status === "online"
                     ? "✅ تکمیل"
-                    : status === "running"
-                    ? "⏳ در حال اجرا"
                     : status === "error"
                     ? "❌ خطا"
                     : "• در انتظار"}

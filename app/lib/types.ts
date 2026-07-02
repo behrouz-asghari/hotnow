@@ -38,6 +38,7 @@ export interface AnalysisOutput {
   persianReport: string;
 }
 
+export type SourceStatus = "online" | "empty" | "error" | "timeout";
 
 
 export type SourceName = "google" | "wiki" | "ninisite" | "karzar" | "digikala";
@@ -51,6 +52,67 @@ export interface RawTrendItem {
   score?: number;
 }
 
+export type AnalysisResult = {
+  generatedAt: string;
+  items: any[];
+  labels: any;
+  sentiment: any;
+  forecast: any;
+  reports: {
+    generalReport: string;
+    womenSocialReport: string;
+    marketReport: string;
+  };
+  sourceBreakdown: {
+    google: number;
+    wiki: number;
+    ninisite: number;
+    digikala: number;
+  };
+};
 
+export type AnalysisJobResponse = {
+  id: string;
+  status: "queued" | "running" | "done" | "error";
+  progress: number;
+  step:
+    | "starting"
+    | "fetching_sources"
+    | "fusing_data"
+    | "clustering"
+    | "sentiment_forecast"
+    | "building_prompts"
+    | "generating_reports"
+    | "completed"
+    | "failed";
+  message: string;
+  data: AnalysisResult | null;
+  error: string | null;
+  createdAt: string;
+  updatedAt: string;
+  sources?: {
+    google: SourceStatus;
+    wiki: SourceStatus;
+    ninisite: SourceStatus;
+    digikala: SourceStatus;
+  };
+};
 
+export const stepLabels: Record<AnalysisJobResponse["step"], string> = {
+  starting: "شروع تحلیل",
+  fetching_sources: "دریافت داده از منابع",
+  fusing_data: "ادغام و نرمال‌سازی",
+  clustering: "خوشه‌بندی و برچسب‌گذاری",
+  sentiment_forecast: "تحلیل احساسات و پیش‌بینی",
+  building_prompts: "آماده‌سازی پرامپت‌ها",
+  generating_reports: "تولید گزارش نهایی",
+  completed: "تکمیل شد",
+  failed: "خطا",
+};
 
+export type SafeResult<T> = {
+  ok: boolean;
+  data: T;
+  error?: string;
+  status: SourceStatus;
+};

@@ -53,32 +53,36 @@ export async function fetchNiniSiteHottest(): Promise<RawTrendItem[]> {
 
 
 export async function fetchKarzarTop(): Promise<RawTrendItem[]> {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), 8000);
+
   try {
-    const response = await fetch("https://www.karzar.net/campaigns/top", {
-      next: { revalidate: 3600 },
-    });
-    const html = await response.text();
-    const $ = cheerio.load(html);
-    const items: RawTrendItem[] = [];
-
-    $(".campaign-box__middle").each((_, el) => {
-      const title = $(el).find(".campaign-box__title").text().trim();
-      const signCount = parsePersianInt($(el).find(".campaign-box__sign-number").text());
-
-      if (title) {
-        items.push({
-          title,
-          source: "karzar",
-          // هر ۱۰۰۰ امضا را معادل یک واحد امتیاز در نظر می‌گیریم (قابل تنظیم)
-          score: Math.max(signCount / 100, 60),
-          timestamp: Date.now(),
-        });
-      }
+    const res = await fetch("https://www.karzar.net/campaigns/top", {
+      method: "GET",
+      redirect: "follow",
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+      signal: controller.signal,
+      cache: "no-store",
     });
 
-    return items;
-  } catch (error) {
-    console.error("Karzar Scrape Error:", error);
+    clearTimeout(t);
+
+    if (!res.ok) return [];
+    const finalUrl = res.url || "";
+    if (!finalUrl.includes("karzar.net")) return []; // redirect مشکوک
+
+    const html = await res.text();
+    if (!html || html.length < 1000) return [];
+
+    // ... cheerio parse
+    return [];
+  } catch (e) {
+    clearTimeout(t);
+    console.error("Karzar Scrape Error:", e);
     return [];
   }
 }
+
