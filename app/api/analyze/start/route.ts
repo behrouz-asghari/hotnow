@@ -1,51 +1,33 @@
-// app/api/analyze/start/route.ts
-import { randomUUID } from "crypto";
-import { NextResponse } from "next/server";
-import { createJob, updateJob } from "../jobs";
 import { runAnalysis } from "../runAnalysis";
 
+export const maxDuration = 60;
+
 export async function POST() {
-  const jobId = randomUUID();
+  const encoder = new TextEncoder();
 
-  createJob(jobId);
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (data: any) => {
+        controller.enqueue(encoder.encode(JSON.stringify(data) + "\n"));
+      };
 
-  updateJob(jobId, {
-    status: "running",
-    progress: 0,
-    step: "starting",
-    message: "تحلیل در صف اجرا قرار گرفت",
+      try {
+        await runAnalysis({
+          onProgress(payload) {
+            send({ type: "progress", ...payload });
+          },
+        }).then((result) => {
+          send({ type: "done", data: result });
+          controller.close();
+        });
+      } catch (e) {
+        send({ type: "error", message: String(e) });
+        controller.close();
+      }
+    },
   });
 
-  void runAnalysis({
-    onProgress(payload) {
-      updateJob(jobId, {
-        status: payload.step === "failed" ? "error" : "running",
-        progress: payload.progress,
-        step: payload.step,
-        message: payload.message,
-        sources: payload.sources,
-      });
-    },
-  })
-    .then((result) => {
-      updateJob(jobId, {
-        status: "done",
-        progress: 100,
-        step: "completed",
-        message: "تحلیل تکمیل شد",
-        data: result,
-        error: null,
-      });
-    })
-    .catch((error) => {
-      updateJob(jobId, {
-        status: "error",
-        progress: 100,
-        step: "failed",
-        message: "تحلیل با خطا متوقف شد",
-        error: String(error),
-      });
-    });
-
-  return NextResponse.json({ jobId });
+  return new Response(stream, {
+    headers: { "Content-Type": "application/x-ndjson" },
+  });
 }
