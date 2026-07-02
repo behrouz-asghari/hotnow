@@ -46,9 +46,9 @@ async function getAnalysis(): Promise<AnalyzeResponse | null> {
 
 export default async function Page() {
   const data = await getAnalysis();
+ console.log("Fetched analysis data:", data);
 
-
-if (!data) {
+/* if (!data) {
     return (
       <main className="max-w-6xl mx-auto p-6">
         <div className="bg-red-50 border border-red-200 rounded-xl p-10 text-center text-red-600">
@@ -57,7 +57,7 @@ if (!data) {
         </div>
       </main>
     );
-  }
+  } */
   return (
     <main className="max-w-6xl mx-auto p-6 space-y-6">
    <header className="flex items-center justify-between">
