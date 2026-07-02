@@ -3,4 +3,7 @@ export const CONFIG = {
   openRouterModel: process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini",
   openRouterBaseUrl: "https://openrouter.ai/api/v1",
   clusterK: 6,
+  cacheTtlSec: 60 * 30, // 30 min
+  aiCacheTtlSec: 60 * 60 * 6, // 6h
+  wikiMaxItems: 200,
 };
