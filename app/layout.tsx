@@ -1,27 +1,18 @@
-
 import type { Metadata } from "next";
 import "./globals.css";
-import './assets/fonts.css';
-
-
-
 
 export const metadata: Metadata = {
-  title: "Wiki & Google Trends Dashboard",
-  description: "Trending Wikipedia & Google searches",
+  title: "HotNow AI | دیدبان هوشمند ترندهای فارسی",
+  description: "تحلیل لحظه‌ای و چندبعدی روندهای اجتماعی، اقتصادی و رفتاری جامعه ایرانی با بهره‌گیری از هوش مصنوعی و داده‌های باز.",
+  keywords: ["ترندهای روز", "تحلیل داده", "هوش مصنوعی", "رفتارشناسی مصرف‌کننده", "ترندهای گوگل", "نی‌نی‌سایت"],
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fa" dir="rtl">
-      <body
-      >
-        {children}
-      </body>
+      <body className="bg-gray-50 text-gray-900">{children}</body>
     </html>
   );
 }
