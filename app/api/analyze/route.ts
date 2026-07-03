@@ -1,30 +1,25 @@
 import { NextResponse } from "next/server";
-
 import { clusterItems } from "@/app/lib/ai/clustering";
 import { estimateSentiment } from "@/app/lib/ai/sentiment";
 import { forecastTomorrow } from "@/app/lib/ai/forecast";
 import { generateClusterLabels } from "@/app/lib/ai/labels";
 import { callOpenRouter } from "@/app/lib/ai/openrouter";
+import { normalizeAndFuse } from "@/app/lib/fusion/mergeSignals";
+import { fetchDigikalaBestSelling } from "@/app/lib/sources/digikala";
+import { RawTrendItem, SafeResult, SourceName } from "@/app/lib/types";
+import { fetchGoogleTrendsIR } from "@/app/lib/sources/googleTrends";
+import { fetchWikiTopFa } from "@/app/lib/sources/wikiTop";
 import {
   buildGeneralAnalysisPrompt,
   buildWomenSocialPrompt,
   buildDigikalaMarketPrompt,
 } from "@/app/lib/ai/prompts";
-
-import { normalizeAndFuse } from "@/app/lib/fusion/mergeSignals";
-
-import { fetchGoogleTrendsIR } from "@/app/lib/sources/googleTrends";
-import { fetchWikiTopFa } from "@/app/lib/sources/wikiTop";
 import {
   fetchNiniSiteHottest,
   fetchKarzarTop,
   fetchTgStatTrends,
 } from "@/app/lib/sources/webScrapers";
-import { fetchDigikalaBestSelling } from "@/app/lib/sources/digikala";
 
-import { RawTrendItem, SafeResult, SourceName } from "@/app/lib/types";
-
-export const revalidate = 3600;
 
 // ===== Utils =====
 function withTimeout<T>(
@@ -255,45 +250,57 @@ export async function GET() {
           "تحلیل بازار در حال حاضر تولید نشد.";
 
     // 6) Success response
-    return NextResponse.json(
-      {
-        generatedAt: new Date().toISOString(),
-        items: clustered,
-        labels,
-        sentiment,
-        forecast,
-        reports: {
-          generalReport,
-          womenSocialReport,
-          marketReport,
-        },
-        sourceBreakdown: {
-          google: google.length,
-          wiki: wiki.length,
-          ninisite: ninisite.length,
-          karzar: karzar.length,
-          tgstat: tgstat.length,
-          digikala: digikala.length,
-        },
-        status: {
-          google: googleR.status,
-          wiki: wikiR.status,
-          ninisite: ninisiteR.status,
-          karzar: karzarR.status,
-          tgstat: tgstatR.status,
-          digikala: digikalaR.status,
-        },
-        errors: {
-          google: googleR.error ?? null,
-          wiki: wikiR.error ?? null,
-          ninisite: ninisiteR.error ?? null,
-          karzar: karzarR.error ?? null,
-          tgstat: tgstatR.error ?? null,
-          digikala: digikalaR.error ?? null,
-        },
+       // 6) Success response
+    const responseData = {
+      generatedAt: new Date().toISOString(),
+      items: clustered,
+      labels,
+      sentiment,
+      forecast,
+      reports: {
+        generalReport,
+        womenSocialReport,
+        marketReport,
       },
-      { status: 200 }
+      sourceBreakdown: {
+        google: google.length,
+        wiki: wiki.length,
+        ninisite: ninisite.length,
+        karzar: karzar.length,
+        tgstat: tgstat.length,
+        digikala: digikala.length,
+      },
+      status: {
+        google: googleR.status,
+        wiki: wikiR.status,
+        ninisite: ninisiteR.status,
+        karzar: karzarR.status,
+        tgstat: tgstatR.status,
+        digikala: digikalaR.status,
+      },
+      errors: {
+        google: googleR.error ?? null,
+        wiki: wikiR.error ?? null,
+        ninisite: ninisiteR.error ?? null,
+        karzar: karzarR.error ?? null,
+        tgstat: tgstatR.error ?? null,
+        digikala: digikalaR.error ?? null,
+      },
+    };
+
+    // ساخت شیء پاسخ
+    const response = NextResponse.json(responseData, { status: 200 });
+
+    response.headers.set(
+      "Cache-Control",
+      "public, max-age=600, s-maxage=86400, stale-while-revalidate=1200"
     );
+
+    response.headers.set("CDN-Cache-Control", "public, s-maxage=3600");
+    response.headers.set("x-nextjs-cache", "HIT");
+
+    return response;
+
   } catch (e) {
     console.error("Critical Analysis Error:", e);
 

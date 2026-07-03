@@ -21,10 +21,10 @@ export async function fetchDigikalaBestSelling(): Promise<RawTrendItem[]> {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept": "application/json",
-        "Referer": "https://www.digikala.com/",
       },
-      next: { revalidate: 3600 },
-      signal: controller.signal,
+      next: {
+        revalidate: 86400, tags: ["analyze-page"],
+      },
     });
 
     clearTimeout(id);

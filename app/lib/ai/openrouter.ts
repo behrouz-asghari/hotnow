@@ -12,6 +12,10 @@ export async function callOpenRouter(messages: any[]) {
       messages,
       temperature: 0.2,
     }),
+    next: {
+      revalidate: 86400,
+      tags: ["analyze-page"],
+    }
   });
 
   if (!res.ok) throw new Error(`OpenRouter error: ${res.status}`);

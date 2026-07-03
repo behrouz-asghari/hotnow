@@ -2,7 +2,7 @@ import { XMLParser } from "fast-xml-parser";
 import { RawTrendItem } from "../types";
 
 export async function fetchGoogleTrendsIR(): Promise<RawTrendItem[]> {
-  const res = await fetch("https://trends.google.com/trending/rss?geo=IR", { next: { revalidate: 900 } });
+  const res = await fetch("https://trends.google.com/trending/rss?geo=IR", { next: { revalidate: 900 , tags: ["analyze-page"]} });
   const text = await res.text();
 
   const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });

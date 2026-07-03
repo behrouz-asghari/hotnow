@@ -20,7 +20,7 @@ export async function fetchNiniSiteHottest(): Promise<RawTrendItem[]> {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)", // گاهی اوقات هویت بات گوگل بهتر جواب می‌دهد
       },
-      next: { revalidate: 3600 },
+      next: { revalidate: 86400 , tags: ["analyze-page"]},
       signal: controller.signal,
     });
 
@@ -59,13 +59,12 @@ export async function fetchKarzarTop(): Promise<RawTrendItem[]> {
   try {
     const res = await fetch("https://www.karzar.net/campaigns/top", {
       method: "GET",
-      redirect: "follow",
       headers: {
         "User-Agent": "Mozilla/5.0",
         "Accept": "text/html,application/xhtml+xml",
       },
+      next: { revalidate: 86400 , tags: ["analyze-page"]},
       signal: controller.signal,
-      cache: "no-store",
     });
 
     clearTimeout(t);
@@ -97,7 +96,7 @@ export async function fetchTgStatTrends(): Promise<RawTrendItem[]> {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
       },
-      next: { revalidate: 3600 },
+      next: { revalidate: 86400 , tags: ["analyze-page"]},
       signal: controller.signal,
     });
 
