@@ -5,7 +5,6 @@ import { AnalyzeResponse } from "./lib/types";
 import RefreshButton from "./components/RefreshButton";
 import TrendsLabelsBoard from "./components/TrendsLabelsBoard";
 
-export const revalidate = 60 * 60 * 24; // 1 day
 
 async function getAnalysis(): Promise<AnalyzeResponse> {
   const h = await headers();
@@ -16,14 +15,13 @@ async function getAnalysis(): Promise<AnalyzeResponse> {
 
   const baseUrl = `${proto}://${host}`;
   const res = await fetch(`${baseUrl}/api/analyze`, {
-    next: { revalidate: 60 * 60 * 24, tags: ["analyze-page"] },
+    next: { revalidate: 86400, tags: ["analyze-page"] },
   });
 
   if (!res.ok) throw new Error(`analyze_failed_${res.status}`);
 
   const data = (await res.json()) as Partial<AnalyzeResponse>;
 
-  // شرط اعتبار حداقلی (دلخواه خودت)
   const hasUsableData =
     Array.isArray(data.items) && data.items.length > 0;
 
