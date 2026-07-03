@@ -53,7 +53,6 @@ async function getAnalysis(): Promise<AnalyzeResponse | null> {
 }
 export default async function Page() {
   const data = await getAnalysis();
- console.log("Fetched analysis data:", data);
 
 if (!data) {
     return (
