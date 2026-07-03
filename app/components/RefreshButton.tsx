@@ -1,4 +1,3 @@
-// RefreshButton.tsx
 "use client";
 
 import { useState, useTransition } from "react";
@@ -13,27 +12,17 @@ export default function RefreshButton() {
     setMessage("");
 
     try {
-      // ۱. درخواست به ای‌پ‌آی ریفرش برای ریولیدیت کردن تگ‌ها در سرور Next.js
       const res = await fetch("/api/refresh", {
         method: "POST",
       });
-
       if (!res.ok) {
         setMessage("خطا در بروزرسانی داده‌ها");
         return;
       }
-
-      // ۲. اضافه کردن هدر Bypass به درخواست بعدی یا ریلود صفحه
       startTransition(() => {
-        // تغییر آدرس یا ریفرش کردن مسیر جاری با هدر کنترل کش
         router.refresh();
       });
-
       setMessage("داده‌ها بروزرسانی شدند (برای اعمال نهایی صفحه را مجدد ریلود کنید)");
-
-      // اختیاری: برای اطمینان صد درصدی از نادیده گرفتن کش مرورگر/CDN پس از بازسازی
-      window.location.reload();
-
     } catch {
       setMessage("ارتباط با سرور برقرار نشد");
     }
