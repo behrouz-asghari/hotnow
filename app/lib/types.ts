@@ -41,7 +41,7 @@ export interface AnalysisOutput {
 export type SourceStatus = "online" | "empty" | "error" | "timeout";
 
 
-export type SourceName = "google" | "wiki" | "ninisite" | "karzar" | "digikala";
+export type SourceName = "google" | "wiki" | "ninisite" | "karzar" | "digikala" | "tgstat";
 
 export interface RawTrendItem {
   title: string;

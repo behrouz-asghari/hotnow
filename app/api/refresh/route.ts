@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
-import { revalidateTag, revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 export async function POST() {
   try {
     revalidateTag("analyze-page", "max");
-    revalidatePath("/");
 
     return NextResponse.json({
       ok: true,
       message: "Cache invalidated successfully",
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         ok: false,

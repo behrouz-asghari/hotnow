@@ -1,7 +1,7 @@
 import type { Item, SourceName } from "@/app/lib/types";
 
 type Props = {
-  items: Item[];
+  items?: Item[];
 };
 
 const sourceSections: Array<{
@@ -29,13 +29,23 @@ const sourceSections: Array<{
     title: "۱۰ تاپیک نی‌نی‌سایت",
     chipClass: "bg-pink-50 text-pink-700 border-pink-100",
   },
+  {
+    key: "tgstat",
+    title: "۱۰ پست برتر تلگرام",
+    chipClass: "bg-cyan-50 text-cyan-700 border-cyan-100",
+  },
+  {
+    key: "karzar",
+    title: "۱۰ کمپین کارزار",
+    chipClass: "bg-amber-50 text-amber-700 border-amber-100",
+  },
 ];
 
-export default function TrendsLabelsBoard({ items }: Props) {
+export default function TrendsLabelsBoard({ items = [] }: Props) {
   const getTopBySource = (source: SourceName): Item[] => {
     return items
       .filter((it) => it.source === source && it.title?.trim().length > 0)
-      .sort((a, b) => b.weight - a.weight) // اختیاری ولی بهتر
+      .sort((a, b) => b.weight - a.weight)
       .slice(0, 10);
   };
 

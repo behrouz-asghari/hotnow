@@ -15,12 +15,23 @@ import { normalizeAndFuse } from "@/app/lib/fusion/mergeSignals";
 
 import { fetchGoogleTrendsIR } from "@/app/lib/sources/googleTrends";
 import { fetchWikiTopFa } from "@/app/lib/sources/wikiTop";
-import { fetchNiniSiteHottest, fetchKarzarTop } from "@/app/lib/sources/webScrapers";
+import {
+  fetchNiniSiteHottest,
+  fetchKarzarTop,
+  fetchTgStatTrends,
+} from "@/app/lib/sources/webScrapers";
 import { fetchDigikalaBestSelling } from "@/app/lib/sources/digikala";
+
 import { RawTrendItem, SafeResult, SourceName } from "@/app/lib/types";
 
+export const revalidate = 3600;
+
 // ===== Utils =====
-function withTimeout<T>(promise: Promise<T>, ms: number, name: string): Promise<T> {
+function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  name: string
+): Promise<T> {
   let timer: NodeJS.Timeout | null = null;
 
   const timeoutPromise = new Promise<T>((_, reject) => {
@@ -45,6 +56,7 @@ async function safeSource<T>(
   try {
     const data = await withTimeout(fn(), timeoutMs, name);
     const isEmptyArray = Array.isArray(data) && data.length === 0;
+
     return {
       ok: true,
       data,
@@ -69,37 +81,60 @@ function asArray(input: unknown): RawTrendItem[] {
   return Array.isArray(input) ? (input as RawTrendItem[]) : [];
 }
 
-function sanitizeItems(items: RawTrendItem[], source: SourceName): RawTrendItem[] {
+function sanitizeItems(
+  items: RawTrendItem[],
+  source: SourceName
+): RawTrendItem[] {
   return items
-    .filter((x) => x && typeof x.title === "string" && x.title.trim().length > 0)
+    .filter(
+      (x) =>
+        x &&
+        typeof x.title === "string" &&
+        x.title.trim().length > 0
+    )
     .map((x) => ({
       ...x,
       source: x.source ?? source,
       title: x.title.trim(),
+      score: typeof x.score === "number" && Number.isFinite(x.score) ? x.score : 0,
+      timestamp:
+        typeof x.timestamp === "number" && Number.isFinite(x.timestamp)
+          ? x.timestamp
+          : Date.now(),
     }));
 }
 
 // ===== Route =====
 export async function GET() {
   try {
-    // 1) Fetch all sources safely (parallel)
-    const [googleR, wikiR, ninisiteR, karzarR, digikalaR] = await Promise.all([
-      safeSource("google", fetchGoogleTrendsIR, [] as RawTrendItem[], 6000),
-      safeSource("wiki", fetchWikiTopFa, [] as RawTrendItem[], 6000),
-      safeSource("ninisite", fetchNiniSiteHottest, [] as RawTrendItem[], 7000),
-      safeSource("karzar", fetchKarzarTop, [] as RawTrendItem[], 7000),
-      safeSource("digikala", fetchDigikalaBestSelling, [] as RawTrendItem[], 5000),
-    ]);
+    // 1) Fetch all sources safely in parallel
+    const [googleR, wikiR, ninisiteR, karzarR, tgstatR, digikalaR] =
+      await Promise.all([
+        safeSource("google", fetchGoogleTrendsIR, [] as RawTrendItem[], 6000),
+        safeSource("wiki", fetchWikiTopFa, [] as RawTrendItem[], 6000),
+        safeSource("ninisite", fetchNiniSiteHottest, [] as RawTrendItem[], 7000),
+        safeSource("karzar", fetchKarzarTop, [] as RawTrendItem[], 7000),
+        safeSource("tgstat", fetchTgStatTrends, [] as RawTrendItem[], 8000),
+        safeSource("digikala", fetchDigikalaBestSelling, [] as RawTrendItem[], 5000),
+      ]);
 
     const google = sanitizeItems(asArray(googleR.data), "google");
     const wiki = sanitizeItems(asArray(wikiR.data), "wiki");
     const ninisite = sanitizeItems(asArray(ninisiteR.data), "ninisite");
     const karzar = sanitizeItems(asArray(karzarR.data), "karzar");
+    const tgstat = sanitizeItems(asArray(tgstatR.data), "tgstat");
     const digikala = sanitizeItems(asArray(digikalaR.data), "digikala");
 
-    const allItems = [...google, ...wiki, ...ninisite, ...karzar, ...digikala];
+    const allItems = [
+      ...google,
+      ...wiki,
+      ...ninisite,
+      ...karzar,
+      ...tgstat,
+      ...digikala,
+    ];
 
-    // 2) If all sources failed/empty => 503
+    // 2) If all sources failed or returned empty
     if (allItems.length === 0) {
       return NextResponse.json(
         {
@@ -122,7 +157,8 @@ export async function GET() {
           },
           reports: {
             generalReport: "در حال حاضر داده کافی برای تحلیل کلی موجود نیست.",
-            womenSocialReport: "داده کافی از نی‌نی‌سایت برای تحلیل اجتماعی زنان موجود نیست.",
+            womenSocialReport:
+              "داده کافی از نی‌نی‌سایت برای تحلیل اجتماعی زنان موجود نیست.",
             marketReport: "داده کافی از دیجی‌کالا برای تحلیل بازار موجود نیست.",
           },
           sourceBreakdown: {
@@ -130,6 +166,7 @@ export async function GET() {
             wiki: wiki.length,
             ninisite: ninisite.length,
             karzar: karzar.length,
+            tgstat: tgstat.length,
             digikala: digikala.length,
           },
           status: {
@@ -137,6 +174,7 @@ export async function GET() {
             wiki: wikiR.status,
             ninisite: ninisiteR.status,
             karzar: karzarR.status,
+            tgstat: tgstatR.status,
             digikala: digikalaR.status,
           },
           errors: {
@@ -144,6 +182,7 @@ export async function GET() {
             wiki: wikiR.error ?? null,
             ninisite: ninisiteR.error ?? null,
             karzar: karzarR.error ?? null,
+            tgstat: tgstatR.error ?? null,
             digikala: digikalaR.error ?? null,
           },
         },
@@ -151,15 +190,15 @@ export async function GET() {
       );
     }
 
-    // 3) Analysis pipeline (safe)
+    // 3) Analysis pipeline
     const fused = normalizeAndFuse(allItems);
     const clustered = clusterItems(fused);
     const labels = generateClusterLabels(clustered);
     const sentiment = estimateSentiment(clustered);
     const forecast = forecastTomorrow(clustered);
 
-    const ninisiteItems = fused.filter((x: any) => x.source === "ninisite");
-    const digikalaItems = fused.filter((x: any) => x.source === "digikala");
+    const ninisiteItems = fused.filter((x: RawTrendItem) => x.source === "ninisite");
+    const digikalaItems = fused.filter((x: RawTrendItem) => x.source === "digikala");
 
     // 4) Build prompts
     const generalMessages = buildGeneralAnalysisPrompt({
@@ -169,7 +208,7 @@ export async function GET() {
       labels,
     });
 
-    // 5) LLM calls (do not call if no data)
+    // 5) LLM calls safely
     const [generalLLM, womenLLM, marketLLM] = await Promise.all([
       callOpenRouter(generalMessages).catch((e) => {
         console.error("[LLM][general] failed:", e);
@@ -233,6 +272,7 @@ export async function GET() {
           wiki: wiki.length,
           ninisite: ninisite.length,
           karzar: karzar.length,
+          tgstat: tgstat.length,
           digikala: digikala.length,
         },
         status: {
@@ -240,6 +280,7 @@ export async function GET() {
           wiki: wikiR.status,
           ninisite: ninisiteR.status,
           karzar: karzarR.status,
+          tgstat: tgstatR.status,
           digikala: digikalaR.status,
         },
         errors: {
@@ -247,6 +288,7 @@ export async function GET() {
           wiki: wikiR.error ?? null,
           ninisite: ninisiteR.error ?? null,
           karzar: karzarR.error ?? null,
+          tgstat: tgstatR.error ?? null,
           digikala: digikalaR.error ?? null,
         },
       },
@@ -254,6 +296,7 @@ export async function GET() {
     );
   } catch (e) {
     console.error("Critical Analysis Error:", e);
+
     return NextResponse.json(
       {
         error: "analysis_failed",
