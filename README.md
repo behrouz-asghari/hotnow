@@ -1,41 +1,105 @@
-# HotNow - Persian Trends Dashboard
+# 🔥 HotNow
 
-**HotNow** is a modern, high-performance dashboard built with Next.js designed to track and display trending content for the Persian-speaking community. It aggregates data from real-time sources to provide insights into what is currently popular.
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16.1.6-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
+</p>
 
-## 🚀 Features
+<p align="center">
+  <strong>An AI-driven dashboard aggregating and analyzing trending topics for the Persian-speaking community.</strong>
+</p>
 
-* **Live Google Trends:** Displays the hottest daily search queries for Iran.
-* **Wikipedia Top Articles:** Fetches the most-viewed Persian Wikipedia articles from the last 24 hours.
-* **Smart Filtering:** Filters out sensitive or irrelevant categories (e.g., Living People, Births/Deaths) from Wikipedia results.
-* **Shamsi (Jalali) Calendar:** Full support for Persian date formatting.
-* **Optimized Performance:** Leverages Next.js App Router and intelligent caching strategies.
-* **Responsive RTL UI:** Fully optimized layout for Right-to-Left languages using Tailwind CSS.
-* **Pagination:** Seamless data navigation for long lists.
+---
+
+## 📖 Table of Contents
+- [🚀 Overview](#-overview)
+- [✨ Key Features](#-key-features)
+- [🛠 Tech Stack](#%EF%B8%8F-tech-stack)
+- [🏗 Architecture](#%EF%B8%8F-architecture)
+- [🧠 Data & AI Pipeline](#%EF%B8%8F-data--ai-pipeline)
+- [⚙️ Setup & Installation](#%EF%B8%8F-setup--installation)
+- [🌍 Environment Variables](#%EF%B8%8F-environment-variables)
+- [⚡ Caching & Performance](#%EF%B8%8F-caching--performance)
+- [🤝 Contributing](#%EF%B8%8F-contributing)
+
+---
+
+## 🚀 Overview
+
+**HotNow** is a cutting-edge intelligence dashboard designed to surface the most relevant trends within the Persian-speaking ecosystem. By fusing live signals from Google Trends, Wikipedia, Digikala, and social scrapers, it provides a consolidated view of what the community is searching for, reading, and buying.
+
+---
+
+## ✨ Key Features
+
+- 📈 **Live Trend Tracking**: Real-time Google Trends integration for Iran.
+- 📚 **Wikipedia Insights**: Top Persian Wikipedia articles with intelligent category filtering.
+- 🛒 **Market Intelligence**: Analysis of Digikala best-selling products and consumer signals.
+- 🤖 **AI-Powered Analytics**:
+  - **Clustering**: Grouping related topics automatically.
+  - **Sentiment**: Estimating public mood towards trends.
+  - **Forecasting**: Predicting upcoming trending topics.
+  - **Labeling**: Context-aware descriptive labels (General, Social, Market).
+- 📅 **Localized Experience**: Full Jalali (Persian) date support and RTL-first responsive design.
+- 🛡️ **Smart Caching**: Optimized performance using Next.js revalidation and in-memory storage.
+
+---
 
 ## 🛠 Tech Stack
 
-| Category | Technology |
+| Layer | Technology |
 | :--- | :--- |
-| **Framework** | Next.js 16.1.6 (App Router) |
-| **Language** | TypeScript |
-| **UI** | React 19, Tailwind CSS 4 |
-| **Data Parsing** | fast-xml-parser |
-| **Date Handling** | dayjs + jalaliday |
+| **Framework** | [Next.js 16.1.6](https://nextjs.org/) (App Router) |
+| **Library** | [React 19](https://react.dev/) |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) |
+| **Styling** | [Tailwind CSS 4](https://tailwindcss.com/) |
+| **Data Processing** | `cheerio`, `fast-xml-parser`, `ml-kmeans` |
+| **Date/Time** | `dayjs` + `jalaliday` |
+| **AI Engine** | [OpenRouter](https://openrouter.ai/) |
 
-## 📦 Getting Started
+---
+
+## 🏗 Architecture
+
+The project follows a modular architecture for scalability:
+
+- 📂 **`app/api/`**
+  - `analyze`: The central intelligence hub. Consolidates data from all sources and triggers the AI pipeline.
+  - `refresh`: Manual trigger for cache invalidation.
+- 📂 **`app/components/`**
+  - Reusable UI elements: `AnalysisPanel`, `StatCards`, `TrendsLabelsBoard`, `RefreshButton`.
+- 📂 **`app/lib/`**
+  - `ai/`: Logic for clustering, sentiment, and forecasting.
+  - `sources/`: Adapters for Digikala, Google Trends, Wikipedia, etc.
+  - `fusion/`: Signal merging and normalization engine.
+  - `cache/`: In-memory caching utilities.
+  - `utils/`: Text processing and Jalali date helpers.
+
+---
+
+## 🧠 Data & AI Pipeline
+
+The intelligence flow follows a structu1. **Ingestion**: Fetching raw data from Google Trends, Wikipedia, Digikala, Ninisite, Karzar, and TgStat.
+2. **Processing**: Running machine learning algorithms for clustering and sentiment analysis.
+3. **Enrichment**: Generating context-specific labels via OpenRouter (tailored for General, Social, or Market contexts).
+4. **Delivery**: Merging enriched signals into a single API response with a 24-hour cache window.
+
+---
+
+## ⚙️ Setup & Installation
 
 ### Prerequisites
+- **Node.js** (v18 or newer)
+- **Package Manager**: `npm`, `yarn`, or `pnpm`
 
-* **Node.js:** v18 or higher
-* **Package Manager:** npm, yarn, or pnpm
-
-### Installation
+### Installation Steps
 
 1. **Clone the repository**
-
 ```bash
-git clone <repository-url>
-cd hotnow
+   git clone https://github.com/your-username/hotnow.git
+   cd hotnow
 ```
 
 2. **Install dependencies**
@@ -44,11 +108,18 @@ cd hotnow
 npm install
 ```
 
-3. **Run the development server**
+3. **Configure environment variablesCreate a .env.local file and add your key:**
 
 ```bash
-npm run dev
+   OPENROUTER_API_KEY=your_api_key_here
 ```
+
+3. **Run Development Server**
+
+```bash
+   npm run dev
+```
+
 
 4. Open http://localhost:3000 in your browser.
 
@@ -59,45 +130,15 @@ npm run build
 npm start
 ```
 
-## 📂 Project Structure
-
-```text
-hotnow/
-├── app/
-│   ├── assets/          # Custom fonts and static assets
-│   ├── components/      # Reusable UI components (e.g., HotTable.tsx)
-│   ├── utils/           # Helper functions (e.g., date.ts for Jalali conversion)
-│   ├── globals.css      # Global styles
-│   ├── layout.tsx       # Root layout (RTL configuration & metadata)
-│   └── page.tsx         # Main dashboard page + data fetching logic
-├── next.config.ts       # Next.js configuration
-├── package.json
-└── tsconfig.json
-```
-
 ## ⚙️ Configuration & Logic
 
 ### Caching Strategy
 
-To ensure efficiency while keeping data fresh:
+To ensure high availability and low latency:
 
-* **Google Trends:** Revalidated every 1 hour
-* **Wikipedia:** Revalidated every 24 hours
+* **Revalidation:** The /api/analyze endpoint uses Next.js ISR (Incremental Static Regeneration) with an 86,400-second (24h) window.
+* **In-Memory Cache:** Custom utilities minimize redundant upstream API calls between revalidations.
 
-### API Integrations
-
-* **Google Trends RSS:** https://trends.google.com/trends/trendingsearches/daily/rss?geo=IR
-* **Wikimedia REST API:**
-  * Top articles: /metrics/pageviews/top/fa.wikipedia.org
-  * Category validation: /page/fa.wikipedia.org/{title}
-
-### Filtering
-
-The application implements an exclusion list for content filtering:
-
-```
-FORBIDDEN_CATEGORIES = ['Living people', 'Births', 'Deaths', ...]
-```
 
 ## 📄 License
 
