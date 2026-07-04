@@ -1,4 +1,15 @@
-import type { Item, SourceName } from "@/app/lib/types";
+import type { Item as BaseItem, SourceName } from "@/app/lib/types";
+
+// تعریف ساختار جزئیات فیلم (TrendDetail)
+export interface TrendDetail {
+  key: string;
+  value: string | number;
+}
+
+// توسعه تایپ پایه پروژه برای پشتیبانی از فیلد details به همراه جزئیات تایپ‌سیف
+export interface Item extends BaseItem {
+  details?: TrendDetail[];
+}
 
 type Props = {
   items?: Item[];
@@ -18,6 +29,11 @@ const sourceSections: Array<{
     key: "wiki",
     title: "۱۰ مورد ویکی‌پدیا",
     chipClass: "bg-gray-100 text-gray-700 border-gray-200",
+  },
+  {
+    key: "filimo",
+    title: "۱۰ فیلم و سریال برتر فیلیمو",
+    chipClass: "bg-orange-50 text-orange-700 border-orange-100",
   },
   {
     key: "digikala",
@@ -49,6 +65,12 @@ export default function TrendsLabelsBoard({ items = [] }: Props) {
       .slice(0, 10);
   };
 
+  const getDetailValue = (it: Item, key: string): string | number | null => {
+    if (!it.details || !Array.isArray(it.details)) return null;
+    const found = it.details.find((d: TrendDetail) => d.key === key);
+    return found ? found.value : null;
+  };
+
   return (
     <div className="bg-white border rounded-2xl shadow-sm p-4 space-y-5">
       {sourceSections.map((section) => {
@@ -62,15 +84,54 @@ export default function TrendsLabelsBoard({ items = [] }: Props) {
               <p className="text-xs text-gray-400">موردی برای نمایش وجود ندارد.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
-                {topItems.map((it) => (
-                  <span
-                    key={it.id}
-                    title={it.title}
-                    className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${section.chipClass}`}
-                  >
-                    {it.title}
-                  </span>
-                ))}
+                {topItems.map((it) => {
+                  if (it.source === "filimo") {
+                    const genre = getDetailValue(it, "genre");
+                    const director = getDetailValue(it, "director");
+                    const year = getDetailValue(it, "year");
+                    const description = getDetailValue(it, "description");
+
+                    const metaParts = [
+                      year ? `(${year})` : null,
+                      director ? `اثر ${director}` : null,
+                      genre ? `[${genre}]` : null,
+                    ].filter(Boolean);
+
+                    const chipLabel = metaParts.length > 0
+                      ? `${it.title} ${metaParts.join(" | ")}`
+                      : it.title;
+
+                    const tooltipParts = [
+                      `عنوان: ${it.title}`,
+                      year ? `سال ساخت: ${year}` : null,
+                      director ? `کارگردان: ${director}` : null,
+                      genre ? `ژانر: ${genre}` : null,
+                      description ? `\nتوضیحات:\n${description}` : null,
+                    ].filter(Boolean);
+
+                    const tooltipText = tooltipParts.join("\n");
+
+                    return (
+                      <span
+                        key={it.id}
+                        title={tooltipText}
+                        className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium cursor-help transition-colors ${section.chipClass}`}
+                      >
+                        {chipLabel}
+                      </span>
+                    );
+                  }
+
+                  return (
+                    <span
+                      key={it.id}
+                      title={it.title}
+                      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${section.chipClass}`}
+                    >
+                      {it.title}
+                    </span>
+                  );
+                })}
               </div>
             )}
           </section>

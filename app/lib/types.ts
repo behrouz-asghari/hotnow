@@ -41,7 +41,19 @@ export interface AnalysisOutput {
 export type SourceStatus = "online" | "empty" | "error" | "timeout";
 
 
-export type SourceName = "google" | "wiki" | "ninisite" | "karzar" | "digikala" | "tgstat";
+export type SourceName =
+  | "google"
+  | "wiki"
+  | "ninisite"
+  | "karzar"
+  | "digikala"
+  | "tgstat"
+  | "filimo";
+
+export interface TrendDetail {
+  key: string;
+  value: string | number | boolean | null;
+}
 
 export interface RawTrendItem {
   title: string;
@@ -50,6 +62,10 @@ export interface RawTrendItem {
   traffic?: number;
   views?: number;
   score?: number;
+  details?: TrendDetail[];
+  url?: string;
+  image?: string;
+
 }
 
 export type AnalysisResult = {
@@ -76,15 +92,15 @@ export type AnalysisJobResponse = {
   status: "queued" | "running" | "done" | "error";
   progress: number;
   step:
-    | "starting"
-    | "fetching_sources"
-    | "fusing_data"
-    | "clustering"
-    | "sentiment_forecast"
-    | "building_prompts"
-    | "generating_reports"
-    | "completed"
-    | "failed";
+  | "starting"
+  | "fetching_sources"
+  | "fusing_data"
+  | "clustering"
+  | "sentiment_forecast"
+  | "building_prompts"
+  | "generating_reports"
+  | "completed"
+  | "failed";
   message: string;
   data: AnalysisResult | null;
   error: string | null;

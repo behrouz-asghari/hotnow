@@ -8,6 +8,7 @@ import { normalizeAndFuse } from "@/app/lib/fusion/mergeSignals";
 import { fetchDigikalaBestSelling } from "@/app/lib/sources/digikala";
 import { RawTrendItem, SafeResult, SourceName } from "@/app/lib/types";
 import { fetchGoogleTrendsIR } from "@/app/lib/sources/googleTrends";
+
 import { fetchWikiTopFa } from "@/app/lib/sources/wikiTop";
 import {
   buildGeneralAnalysisPrompt,
@@ -19,6 +20,7 @@ import {
   fetchKarzarTop,
   fetchTgStatTrends,
 } from "@/app/lib/sources/webScrapers";
+import { fetchFilimoPopular } from "@/app/lib/sources/filimoPopular";
 
 
 // ===== Utils =====
@@ -103,7 +105,7 @@ function sanitizeItems(
 export async function GET() {
   try {
     // 1) Fetch all sources safely in parallel
-    const [googleR, wikiR, ninisiteR, karzarR, tgstatR, digikalaR] =
+    const [googleR, wikiR, ninisiteR, karzarR, tgstatR, digikalaR,filimoR] =
       await Promise.all([
         safeSource("google", fetchGoogleTrendsIR, [] as RawTrendItem[], 6000),
         safeSource("wiki", fetchWikiTopFa, [] as RawTrendItem[], 6000),
@@ -111,6 +113,8 @@ export async function GET() {
         safeSource("karzar", fetchKarzarTop, [] as RawTrendItem[], 7000),
         safeSource("tgstat", fetchTgStatTrends, [] as RawTrendItem[], 8000),
         safeSource("digikala", fetchDigikalaBestSelling, [] as RawTrendItem[], 5000),
+        safeSource("filimo", fetchFilimoPopular, [] as RawTrendItem[], 7000),
+
       ]);
 
     const google = sanitizeItems(asArray(googleR.data), "google");
@@ -119,6 +123,7 @@ export async function GET() {
     const karzar = sanitizeItems(asArray(karzarR.data), "karzar");
     const tgstat = sanitizeItems(asArray(tgstatR.data), "tgstat");
     const digikala = sanitizeItems(asArray(digikalaR.data), "digikala");
+    const filimo = sanitizeItems(asArray(filimoR.data), "filimo");
 
     const allItems = [
       ...google,
@@ -127,6 +132,7 @@ export async function GET() {
       ...karzar,
       ...tgstat,
       ...digikala,
+      ...filimo
     ];
 
     // 2) If all sources failed or returned empty
@@ -163,6 +169,7 @@ export async function GET() {
             karzar: karzar.length,
             tgstat: tgstat.length,
             digikala: digikala.length,
+            filimo: filimo.length,
           },
           status: {
             google: googleR.status,
@@ -171,6 +178,7 @@ export async function GET() {
             karzar: karzarR.status,
             tgstat: tgstatR.status,
             digikala: digikalaR.status,
+            filimo: filimoR.status,
           },
           errors: {
             google: googleR.error ?? null,
@@ -179,6 +187,7 @@ export async function GET() {
             karzar: karzarR.error ?? null,
             tgstat: tgstatR.error ?? null,
             digikala: digikalaR.error ?? null,
+            filimo: filimoR.error ?? null,
           },
         },
         { status: 503 }
@@ -269,6 +278,7 @@ export async function GET() {
         karzar: karzar.length,
         tgstat: tgstat.length,
         digikala: digikala.length,
+        filimo: filimo.length,
       },
       status: {
         google: googleR.status,
@@ -277,6 +287,7 @@ export async function GET() {
         karzar: karzarR.status,
         tgstat: tgstatR.status,
         digikala: digikalaR.status,
+        filimo: filimoR.status,
       },
       errors: {
         google: googleR.error ?? null,
@@ -285,6 +296,7 @@ export async function GET() {
         karzar: karzarR.error ?? null,
         tgstat: tgstatR.error ?? null,
         digikala: digikalaR.error ?? null,
+        filimo: filimoR.error ?? null,
       },
     };
 
