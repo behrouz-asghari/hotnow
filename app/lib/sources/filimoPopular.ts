@@ -25,7 +25,7 @@ export async function fetchFilimoPopular(): Promise<RawTrendItem[]> {
 
   const res = await fetch(url, {
     next: {
-      revalidate: 3600,
+      revalidate: 86400,
       tags: ["analyze-page"],
     },
   });
