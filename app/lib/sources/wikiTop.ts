@@ -1,6 +1,12 @@
 import { RawTrendItem } from "../types";
 import { CONFIG } from "../config";
 
+interface WikiArticle {
+  article: string;
+  rank: number;
+  views: number;
+}
+
 export async function fetchWikiTopFa(): Promise<RawTrendItem[]> {
   const d = new Date();
   d.setDate(d.getDate() - 2);
@@ -18,8 +24,8 @@ export async function fetchWikiTopFa(): Promise<RawTrendItem[]> {
   const articles = (json?.items?.[0]?.articles ?? []).slice(0, CONFIG.wikiMaxItems);
 
   return articles
-    .filter((a: any) => !a.article.includes(":") && a.article !== "صفحهٔ_اصلی")
-    .map((a: any) => ({
+    .filter((a: WikiArticle) => !a.article.includes(":") && a.article !== "صفحهٔ_اصلی")
+    .map((a: WikiArticle) => ({
       source: "wiki" as const,
       title: decodeURIComponent(String(a.article).replaceAll("_", " ")),
       rank: a.rank,

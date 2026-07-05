@@ -12,11 +12,16 @@
     "cheerio": "^1.2.0",
     "dayjs": "^1.11.19",
     "fast-xml-parser": "^5.3.7",
+    "framer-motion": "^12.42.2",
     "jalaliday": "^3.1.1",
+    "lucide-react": "^1.23.0",
     "ml-kmeans": "^7.0.1",
     "next": "^16.2.10",
+    "persian-swear-words": "^3.0.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

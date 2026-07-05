@@ -1,55 +1,13 @@
-export type SourceType = "google" | "wiki";
+// ── Source Configuration ──
+export const SOURCE_NAMES = [
+  "google", "wiki", "ninisite", "karzar", "digikala", "tgstat", "filimo",
+] as const;
 
-
-export interface NormalizedItem extends RawTrendItem {
-  id: string;
-  cleanTitle: string;
-  tokens: string[];
-  weight: number;
-}
-
-export interface ClusteredItem extends NormalizedItem {
-  clusterId: number;
-  clusterLabel?: string;
-}
-
-export type SentimentResult = {
-  fear: number;
-  excitement: number;
-  crisis: number;
-  polarity: number;
-  sexualSignal: number;
-  politicalTension: number;
-};
-
-
-export interface ForecastResult {
-  nextDayScore: number;
-  confidence: number; // 0..1
-  direction: "up" | "flat" | "down";
-}
-
-export interface AnalysisOutput {
-  generatedAt: string;
-  items: ClusteredItem[];
-  clusters: Array<{ id: number; label: string; size: number; score: number }>;
-  sentiment: SentimentResult;
-  forecast: ForecastResult;
-  persianReport: string;
-}
+export type SourceName = (typeof SOURCE_NAMES)[number];
 
 export type SourceStatus = "online" | "empty" | "error" | "timeout";
 
-
-export type SourceName =
-  | "google"
-  | "wiki"
-  | "ninisite"
-  | "karzar"
-  | "digikala"
-  | "tgstat"
-  | "filimo";
-
+// ── Raw Items ──
 export interface TrendDetail {
   key: string;
   value: string | number | boolean | null;
@@ -65,53 +23,91 @@ export interface RawTrendItem {
   details?: TrendDetail[];
   url?: string;
   image?: string;
-
 }
 
-export type AnalysisResult = {
+// ── Pipeline Items ──
+export interface NormalizedItem extends RawTrendItem {
+  id: string;
+  cleanTitle: string;
+  tokens: string[];
+  weight: number;
+}
+
+export interface ClusteredItem extends NormalizedItem {
+  clusterId: number;
+  clusterLabel?: string;
+}
+
+// ── Analysis Results ──
+export interface SentimentResult {
+  fear: number;
+  excitement: number;
+  crisis: number;
+  polarity: number;
+  sexualSignal: number;
+  politicalTension: number;
+}
+
+export interface ForecastResult {
+  nextDayScore: number;
+  confidence: number;
+  direction: "up" | "flat" | "down";
+}
+
+export type ClusterLabels = Record<number, string>;
+
+// ── Source Fetcher Result ──
+export type SafeResult<T> = {
+  ok: boolean;
+  data: T;
+  error?: string;
+  status: SourceStatus;
+};
+
+// ── API Response Types ──
+export type SourceBreakdown = Record<SourceName, number>;
+
+export type SourceStatusMap = Record<SourceName, SourceStatus>;
+
+export type SourceErrors = Record<SourceName, string | null>;
+
+export interface AnalyzeResponse {
   generatedAt: string;
-  items: any[];
-  labels: any;
-  sentiment: any;
-  forecast: any;
+  items: ClusteredItem[];
+  sentiment: SentimentResult;
+  forecast: ForecastResult;
+  labels: ClusterLabels;
   reports: {
     generalReport: string;
     womenSocialReport: string;
     marketReport: string;
   };
-  sourceBreakdown: {
-    google: number;
-    wiki: number;
-    ninisite: number;
-    digikala: number;
-  };
-};
+  sourceBreakdown: SourceBreakdown;
+  status: SourceStatusMap;
+  errors: SourceErrors;
+}
 
+// ── Job System Types ──
 export type AnalysisJobResponse = {
   id: string;
   status: "queued" | "running" | "done" | "error";
   progress: number;
   step:
-  | "starting"
-  | "fetching_sources"
-  | "fusing_data"
-  | "clustering"
-  | "sentiment_forecast"
-  | "building_prompts"
-  | "generating_reports"
-  | "completed"
-  | "failed";
+    | "starting"
+    | "fetching_sources"
+    | "fusing_data"
+    | "clustering"
+    | "sentiment_forecast"
+    | "building_prompts"
+    | "generating_reports"
+    | "completed"
+    | "failed";
   message: string;
-  data: AnalysisResult | null;
+  data: AnalyzeResponse | null;
   error: string | null;
   createdAt: string;
   updatedAt: string;
-  sources?: {
-    google: SourceStatus;
-    wiki: SourceStatus;
-    ninisite: SourceStatus;
-    digikala: SourceStatus;
-  };
+  sources?: Partial<SourceStatusMap>;
 };
 
 export const stepLabels: Record<AnalysisJobResponse["step"], string> = {
@@ -124,55 +120,4 @@ export const stepLabels: Record<AnalysisJobResponse["step"], string> = {
   generating_reports: "تولید گزارش نهایی",
   completed: "تکمیل شد",
   failed: "خطا",
-};
-
-export type SafeResult<T> = {
-  ok: boolean;
-  data: T;
-  error?: string;
-  status: SourceStatus;
-};
-
-export type Item = {
-  id: string;
-  title: string;
-  source: SourceName;
-  clusterId: number;
-  weight: number;
-};
-
-export type AnalyzeResponse = {
-  generatedAt: string;
-  items: Array<{
-    id: string;
-    title: string;
-    source: SourceName;
-    clusterId: number;
-    weight: number;
-  }>;
-  sentiment: {
-    fear: number;
-    excitement: number;
-    crisis: number;
-    sexualSignal: number;
-    politicalTension?: number;
-    polarity?: number;
-  };
-  forecast: {
-    direction: "up" | "flat" | "down";
-    confidence: number;
-  };
-  labels: Record<number, string>;
-  reports: {
-    generalReport: string;
-    womenSocialReport: string;
-    marketReport: string;
-  };
-  sourceBreakdown?: {
-    google: number;
-    wiki: number;
-    ninisite: number;
-    karzar: number;
-    digikala: number;
-  };
 };

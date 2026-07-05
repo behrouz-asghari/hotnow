@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* ── Vazirmatn Fonts ── */
 @font-face {
   font-family: 'Vazirmatn';
   src: url('/fonts/Vazirmatn-Regular.woff2') format('woff2'),
@@ -7,7 +8,6 @@
   font-weight: 400;
   font-style: normal;
 }
-
 @font-face {
   font-family: 'Vazirmatn';
   src: url('/fonts/Vazirmatn-Medium.woff2') format('woff2'),
@@ -15,7 +15,6 @@
   font-weight: 500;
   font-style: normal;
 }
-
 @font-face {
   font-family: 'Vazirmatn';
   src: url('/fonts/Vazirmatn-Bold.woff2') format('woff2'),
@@ -24,28 +23,76 @@
   font-style: normal;
 }
 
-/* Theme variables */
+/* ── Dark Theme Variables ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-surface: #334155;
+  --bg-elevated: #475569;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-subtle: #334155;
+  --border-default: #475569;
+
+  /* Neon Accents */
+  --accent-blue: #3b82f6;
+  --accent-violet: #8b5cf6;
+  --accent-cyan: #06b6d4;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+
+  /* Glows */
+  --glow-blue: 0 0 20px rgba(59, 130, 246, 0.3);
+  --glow-violet: 0 0 20px rgba(139, 92, 246, 0.3);
+  --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.3);
 }
 
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a; /* slate-900 */
-    --foreground: #f1f5f9; /* slate-100 */
-  }
-}
-
-
-/* Base styles */
-html {
-  scroll-behavior: smooth;
-}
+/* ── Base ── */
+html { scroll-behavior: smooth; }
 
 body {
-    font-family: 'Vazirmatn', sans-serif;
-
-  @apply bg-[var(--background)] text-[var(--foreground)] min-h-screen;
+  font-family: 'Vazirmatn', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
 }
+
+/* ── Glass Morphism ── */
+.glass {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+}
+
+/* ── Gradient Border ── */
+.gradient-border {
+  position: relative;
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-violet), var(--accent-cyan));
+  z-index: -1;
+  opacity: 0.5;
+}
+
+/* ── Glow Card ── */
+.glow-card {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.glow-card:hover {
+  box-shadow: var(--glow-blue);
+  transform: translateY(-2px);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--bg-elevated); border-radius: 3px; }

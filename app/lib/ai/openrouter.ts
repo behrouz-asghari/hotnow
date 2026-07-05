@@ -1,6 +1,30 @@
 import { CONFIG } from "../config";
 
-export async function callOpenRouter(messages: any[]) {
+export interface LLMMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+export interface LLMChoice {
+  message: {
+    role: string;
+    content: string;
+  };
+  index: number;
+  finish_reason: string;
+}
+
+export interface LLMResponse {
+  id: string;
+  choices: LLMChoice[];
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
+
+export async function callOpenRouter(messages: LLMMessage[]): Promise<LLMResponse> {
   const res = await fetch(`${CONFIG.openRouterBaseUrl}/chat/completions`, {
     method: "POST",
     headers: {

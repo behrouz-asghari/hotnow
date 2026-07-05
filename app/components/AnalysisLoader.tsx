@@ -1,216 +1,128 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
+import { motion } from "framer-motion";
+import { AlertCircle, CheckCircle2, AlertTriangle } from "lucide-react";
+import { useAnalysisJob } from "./useAnalysisJob";
 import StatCards from "./StatCards";
 import AnalysisPanel from "./AnalysisPanel";
-import { AnalysisJobResponse, SourceStatus, stepLabels } from "../lib/types";
-
-
+import AnalysisProgress from "./AnalysisProgress";
+import SourceStatusGrid from "./SourceStatusGrid";
+import type { SourceStatus } from "../lib/types";
 
 export default function AnalysisLoader() {
-  const [jobId, setJobId] = useState<string | null>(null);
-  const [job, setJob] = useState<AnalysisJobResponse | null>(null);
-  const [bootError, setBootError] = useState<string | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { job, error, pollErrors, start } = useAnalysisJob();
 
   const sourceEntries = useMemo(() => {
     if (!job?.sources) return [];
     return Object.entries(job.sources) as Array<[string, SourceStatus]>;
   }, [job?.sources]);
 
-  async function startAnalysis() {
-    setBootError(null);
-    setJob(null);
-    setJobId(null);
-
-    const res = await fetch("/api/analyze/start", {
-      method: "POST",
-    });
-
-    if (!res.ok) {
-      throw new Error("شروع تحلیل ناموفق بود");
-    }
-
-    const data = await res.json();
-    setJobId(data.jobId);
-  }
-
-  useEffect(() => {
-    startAnalysis().catch((error) => {
-      setBootError(String(error));
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!jobId) return;
-
-    async function fetchStatus() {
-      const res = await fetch(`/api/analyze/status?jobId=${jobId}`, {
-        cache: "no-store",
-      });
-
-      if (!res.ok) {
-        throw new Error("دریافت وضعیت تحلیل ناموفق بود");
-      }
-
-      const data: AnalysisJobResponse = await res.json();
-      setJob(data);
-
-      if (data.status === "done" || data.status === "error") {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-      }
-    }
-
-    fetchStatus().catch((error) => {
-      setBootError(String(error));
-    });
-
-    intervalRef.current = setInterval(() => {
-      fetchStatus().catch((error) => {
-        setBootError(String(error));
-      });
-    }, 1500);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [jobId]);
-
-  if (bootError) {
+  // Critical boot error
+  if (error) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
-        <div className="mb-2 text-sm font-medium text-red-700">خطا</div>
-        <div className="text-sm text-red-600">{bootError}</div>
-
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-6"
+      >
+        <div className="mb-2 text-sm font-medium text-rose-300 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
+          خطا
+        </div>
+        <div className="text-sm text-rose-400">{error}</div>
         <button
-          onClick={() => startAnalysis().catch((error) => setBootError(String(error)))}
-          className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-white"
+          onClick={() => start()}
+          className="mt-4 rounded-lg bg-gradient-to-r from-blue-600 to-violet-600 px-4 py-2 text-sm text-white hover:from-blue-500 hover:to-violet-500 transition-all shadow-lg shadow-blue-500/20"
         >
           تلاش مجدد
         </button>
-      </div>
+      </motion.div>
     );
   }
 
+  // Waiting for job to start
   if (!job) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <div className="text-sm text-slate-700">در حال شروع تحلیل...</div>
+      <div className="rounded-2xl border border-[#334155] bg-[#1e293b] p-6">
+        <div className="flex items-center gap-3">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+          <div className="text-sm text-slate-300">در حال شروع تحلیل...</div>
+        </div>
       </div>
     );
   }
 
+  // Done
   if (job.status === "done" && job.data) {
     return (
       <div className="space-y-6">
-        <div className="rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-300 flex items-center gap-2"
+        >
+          <CheckCircle2 className="w-4 h-4" />
           تحلیل با موفقیت تکمیل شد
-        </div>
+        </motion.div>
 
+        <section className="max-w-6xl mx-auto p-6 space-y-6">
+          <header className="flex items-center justify-between">
+            <h1 className="text-2xl font-extrabold bg-gradient-to-l from-blue-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">
+              داشبورد AI ترندها
+            </h1>
+            <span className="text-xs text-slate-400">
+              بروزرسانی: {new Date(job.data.generatedAt).toLocaleString("fa-IR")}
+            </span>
+          </header>
 
-<section className="max-w-6xl mx-auto p-6 space-y-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold">🔥 داشبورد AI ترندها</h1>
-        <span className="text-xs text-gray-500">
-          بروزرسانی: {new Date(job.data.generatedAt).toLocaleString("fa-IR")}
-        </span>
-      </header>
-
-      <StatCards
-        fear={job.data.sentiment.fear}
-        excitement={job.data.sentiment.excitement}
-        crisis={job.data.sentiment.crisis}
-        sexualSignal={job.data.sentiment.sexualSignal}
-        polarity={job.data.sentiment.polarity}
-        politicalTension={job.data.sentiment.politicalTension}
-      />
-
-      <AnalysisPanel
-        generalReport={job.data.reports.generalReport}
-        womenSocialReport={job.data.reports.womenSocialReport}
-        marketReport={job.data.reports.marketReport}
-      />
-
-      {/* <TrendsTable items={data.items} labels={data.labels} /> */}
-    </section>
-
+          <StatCards {...job.data.sentiment} />
+          <AnalysisPanel {...job.data.reports} />
+        </section>
       </div>
     );
   }
 
+  // Error
   if (job.status === "error") {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
-        <div className="mb-2 text-sm font-medium text-red-700">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-6"
+      >
+        <div className="mb-2 text-sm font-medium text-rose-300 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
           تحلیل با خطا متوقف شد
         </div>
-        <div className="text-sm text-red-600">{job.error ?? job.message}</div>
-
+        <div className="text-sm text-rose-400">{job.error ?? job.message}</div>
         <button
-          onClick={() => startAnalysis().catch((error) => setBootError(String(error)))}
-          className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-white"
+          onClick={() => start()}
+          className="mt-4 rounded-lg bg-gradient-to-r from-blue-600 to-violet-600 px-4 py-2 text-sm text-white hover:from-blue-500 hover:to-violet-500 transition-all shadow-lg shadow-blue-500/20"
         >
           تلاش مجدد
         </button>
-      </div>
+      </motion.div>
     );
   }
 
+  // In progress
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6">
-        <div className="mb-3 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-700">در حال تحلیل داده‌ها</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              {stepLabels[job.step] ?? job.message}
-            </p>
-          </div>
+      {/* Transient poll error warning */}
+      {pollErrors >= 3 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-300 flex items-center gap-2"
+        >
+          <AlertTriangle className="w-4 h-4" />
+          مشکل موقتی در دریافت به‌روزرسانی. در حال تلاش مجدد...
+        </motion.div>
+      )}
 
-          <div className="text-sm font-medium text-slate-700">
-            {job.progress}%
-          </div>
-        </div>
-
-        <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200">
-          <div
-            className="h-full rounded-full bg-blue-600 transition-all duration-500 text-gray-700"
-            style={{ width: `${job.progress}%` }}
-          />
-        </div>
-
-        <p className="mt-3 text-sm text-slate-600">{job.message}</p>
-      </section>
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-6">
-        <h3 className="mb-4 text-base font-semibold text-gray-700">وضعیت منابع</h3>
-
-        <div className="grid gap-3 md:grid-cols-2">
-          {sourceEntries.length === 0 ? (
-            <div className="text-sm text-slate-500">هنوز وضعیتی ثبت نشده است.</div>
-          ) : (
-            sourceEntries.map(([name, status]) => (
-              <div
-                key={name}
-                className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3"
-              >
-                <span className="font-medium capitalize text-gray-700">{name}</span>
-                <span className="text-sm text-gray-700">
-                  {status === "online"
-                    ? "✅ تکمیل"
-                    : status === "error"
-                    ? "❌ خطا"
-                    : "• در انتظار"}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
+      <AnalysisProgress job={job} />
+      <SourceStatusGrid sources={sourceEntries} />
     </div>
   );
 }
