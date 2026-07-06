@@ -8,6 +8,7 @@ import { RawTrendItem } from "@/app/lib/types";
 import { fetchAllSources } from "@/app/lib/pipeline/fetchSources";
 import { sanitizeItems } from "@/app/lib/pipeline/sanitize";
 import { generateReports } from "@/app/lib/pipeline/llmReports";
+import { saveRawTrendItems } from "@/app/lib/pipeline/saveHistory";
 import {
   buildAnalyzeResponse,
   buildErrorResponse,
@@ -28,6 +29,14 @@ export async function GET() {
     // 3) Empty check
     if (sanitized.length === 0) {
       return buildErrorResponse("فعلاً از هیچ منبعی داده دریافت نشد.");
+    }
+
+    // 3.5) Save to Supabase
+    try {
+      const saveResult = await saveRawTrendItems(sanitized);
+      console.log("Save result:", saveResult);
+    } catch (saveErr) {
+      console.error("History save failed:", saveErr);
     }
 
     // 4) Analysis pipeline
