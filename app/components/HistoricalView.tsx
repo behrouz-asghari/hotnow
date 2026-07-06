@@ -101,7 +101,7 @@ export default function HistoricalView() {
           <Search className="w-4 h-4 text-slate-400" />
           <input
             type="text"
-            placeholder="جستجو در عنوانات..."
+            placeholder="جستجو در عنوان ها..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent text-sm text-slate-200 outline-none w-48 placeholder:text-slate-500"
@@ -148,7 +148,7 @@ export default function HistoricalView() {
       {!loading && data && data.topTitles.length > 0 && (
         <div className="bg-[#1e293b] rounded-2xl border border-[#334155] p-5">
           <h3 className="text-sm font-semibold text-slate-200 mb-4">
-            عنوانات برتر {sourceConfig.label} — {data.dates.length} روز
+            عنوان ها برتر {sourceConfig.label} — {data.dates.length} روز
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
