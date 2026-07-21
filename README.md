@@ -11,7 +11,8 @@
 <p align="center">
   <strong>An AI-driven dashboard aggregating and analyzing trending topics for the Persian-speaking community.</strong>
 </p>
-<img width="1920" height="1802" alt="ScreenCaptureHotNow" src="https://github.com/user-attachments/assets/70ffa5f0-e1dc-4090-9bd9-e4ea32d057d6" />
+
+<img width="1920" height="2438" alt="screencapture-hotnow-ir" src="https://github.com/user-attachments/assets/8cdd237d-c698-4a24-84bb-1f617be4e1e6" />
 
 ---
 
