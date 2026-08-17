@@ -76,7 +76,7 @@ export default function AnalysisLoader() {
             </span>
           </header>
 
-          <StatCards {...job.data.sentiment} />
+          <StatCards sentiment={job.data.sentiment} />
           <AnalysisPanel {...job.data.reports} />
         </section>
       </div>

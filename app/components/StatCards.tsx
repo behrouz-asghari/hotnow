@@ -49,7 +49,6 @@ function CircularGauge({ value, color, glowColor }: { value: number; color: stri
   );
 }
 
-// در اینجا props دیگر SentimentResult نیست، بلکه مستقیماً آبجکت sentiment است
 export default function StatCards({ sentiment }: { sentiment: GeneralReportSentiment }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
