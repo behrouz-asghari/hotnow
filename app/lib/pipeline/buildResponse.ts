@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import {
   AnalyzeResponse,
   ClusteredItem,
@@ -11,6 +12,7 @@ import {
   SourceName,
   SourceStatusMap,
   RawTrendItem,
+  GeneralAnalysisOutput
 } from "../types";
 
 export function buildAnalyzeResponse(params: {
@@ -18,7 +20,11 @@ export function buildAnalyzeResponse(params: {
   labels: ClusterLabels;
   sentiment: SentimentResult;
   forecast: ForecastResult;
-  reports: { generalReport: string; womenSocialReport: string; marketReport: string };
+  reports: {
+    generalReport: GeneralAnalysisOutput;
+    womenSocialReport: string;
+    marketReport: string;
+  };
   sourceResults: Map<SourceName, SafeResult<RawTrendItem[]>>;
   sourceCounts: SourceBreakdown;
   reportWarnings?: string[];
@@ -35,6 +41,7 @@ export function buildAnalyzeResponse(params: {
     errors: buildErrorMap(params.sourceResults),
   };
 }
+
 
 function buildStatusMap(results: Map<SourceName, SafeResult<RawTrendItem[]>>): SourceStatusMap {
   const entries = Array.from(results.entries());

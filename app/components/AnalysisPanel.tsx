@@ -4,9 +4,10 @@ import { motion } from "framer-motion";
 import { Brain, BarChart3, Users, ShoppingCart } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { GeneralAnalysisOutput } from "@/app/lib/types";
 
 type Props = {
-  generalReport: string;
+  generalReport: GeneralAnalysisOutput;
   womenSocialReport: string;
   marketReport: string;
 };
@@ -67,7 +68,7 @@ function ReportSection({ title, content, icon: Icon }: { title: string; content:
 
 export default function AnalysisPanel({ generalReport, womenSocialReport, marketReport }: Props) {
   const reports = [
-    { title: SECTIONS[0].title, content: generalReport, icon: SECTIONS[0].icon },
+    { title: SECTIONS[0].title, content: generalReport.text, icon: SECTIONS[0].icon },
     { title: SECTIONS[1].title, content: womenSocialReport, icon: SECTIONS[1].icon },
     { title: SECTIONS[2].title, content: marketReport, icon: SECTIONS[2].icon },
   ];

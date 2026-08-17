@@ -70,22 +70,36 @@ export type SourceBreakdown = Record<SourceName, number>;
 export type SourceStatusMap = Record<SourceName, SourceStatus>;
 
 export type SourceErrors = Record<SourceName, string | null>;
+export type GeneralReportSentiment = {
+  fear: number;
+  excitement: number;
+  crisis: number;
+  sexualSignal: number;
+  politicalTension: number;
+  polarity: number;
+};
 
-export interface AnalyzeResponse {
+export type GeneralAnalysisOutput = {
+  text: string;
+  sentiment: GeneralReportSentiment;
+};
+
+export type AnalyzeResponse = {
   generatedAt: string;
   items: ClusteredItem[];
+  labels: ClusterLabels;
   sentiment: SentimentResult;
   forecast: ForecastResult;
-  labels: ClusterLabels;
   reports: {
-    generalReport: string;
+    generalReport: GeneralAnalysisOutput;
     womenSocialReport: string;
     marketReport: string;
   };
   sourceBreakdown: SourceBreakdown;
-  status: SourceStatusMap;
-  errors: SourceErrors;
-}
+  status: Record<string, unknown>;
+  errors: Record<string, unknown>;
+};
+
 
 // ── Job System Types ──
 export type AnalysisJobResponse = {
@@ -93,15 +107,15 @@ export type AnalysisJobResponse = {
   status: "queued" | "running" | "done" | "error";
   progress: number;
   step:
-    | "starting"
-    | "fetching_sources"
-    | "fusing_data"
-    | "clustering"
-    | "sentiment_forecast"
-    | "building_prompts"
-    | "generating_reports"
-    | "completed"
-    | "failed";
+  | "starting"
+  | "fetching_sources"
+  | "fusing_data"
+  | "clustering"
+  | "sentiment_forecast"
+  | "building_prompts"
+  | "generating_reports"
+  | "completed"
+  | "failed";
   message: string;
   data: AnalyzeResponse | null;
   error: string | null;

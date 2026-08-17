@@ -2,10 +2,10 @@
 
 import { motion } from "framer-motion";
 import { Brain, Zap, AlertTriangle, Compass, TrendingUp, Magnet } from "lucide-react";
-import type { SentimentResult } from "@/app/lib/types";
+import type { GeneralReportSentiment } from "@/app/lib/types";
 
 type MetricConfig = {
-  key: keyof SentimentResult;
+  key: keyof GeneralReportSentiment;
   label: string;
   icon: React.ElementType;
   color: string;
@@ -24,7 +24,9 @@ const METRICS: MetricConfig[] = [
 function CircularGauge({ value, color, glowColor }: { value: number; color: string; glowColor: string }) {
   const radius = 28;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (value * circumference);
+  // اطمینان از اینکه مقدار عددی بین 0 تا 1 است
+  const clampedValue = Math.min(Math.max(value, 0), 1);
+  const offset = circumference - (clampedValue * circumference);
 
   return (
     <div className="relative w-16 h-16">
@@ -41,13 +43,14 @@ function CircularGauge({ value, color, glowColor }: { value: number; color: stri
         />
       </svg>
       <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-slate-100">
-        {Math.round(value * 100)}%
+        {Math.round(clampedValue * 100)}%
       </span>
     </div>
   );
 }
 
-export default function StatCards(props: SentimentResult) {
+// در اینجا props دیگر SentimentResult نیست، بلکه مستقیماً آبجکت sentiment است
+export default function StatCards({ sentiment }: { sentiment: GeneralReportSentiment }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
       {METRICS.map((m, i) => (
@@ -59,7 +62,7 @@ export default function StatCards(props: SentimentResult) {
           className="bg-[#1e293b] rounded-2xl border border-[#334155] p-4 glow-card flex flex-col items-center gap-3"
         >
           <m.icon className="w-5 h-5" style={{ color: m.color }} />
-          <CircularGauge value={props[m.key] ?? 0} color={m.color} glowColor={m.glowColor} />
+          <CircularGauge value={sentiment[m.key] ?? 0} color={m.color} glowColor={m.glowColor} />
           <span className="text-xs text-slate-400 font-medium text-center">{m.label}</span>
         </motion.div>
       ))}

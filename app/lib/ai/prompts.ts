@@ -19,19 +19,55 @@ function safeStringify(payload: unknown): string {
   return JSON.stringify(payload).slice(0, TRUNCATE_LIMIT);
 }
 
-export function buildGeneralAnalysisPrompt(payload: GeneralPromptPayload): LLMMessage[] {
+export function buildGeneralAnalysisPrompt(
+  payload: GeneralPromptPayload,
+): LLMMessage[] {
   return [
-    {
-      role: "system",
-      content:
-        "تو یک تحلیلگر داده فارسی هستی. تحلیل باید دقیق، غیراغراق‌آمیز و کاربردی باشد.",
-    },
-    {
-      role: "user",
-      content: `بر اساس داده‌های ترند زیر، یک تحلیل کلی یکپارچه و تحلیلی حداکثر در دو پاراگراف ارائه بده که خوشه‌های موضوعی اصلی، موضوعات روبه‌رشد، نشانه‌های نگرانی و تنش، ذهن جمعی، پیش‌بینی رفتاری کوتاه‌مدت و جمع‌بندی روانشناختی-جامعه‌شناختی را پوشش دهد.\n\nداده:\n${safeStringify(payload)}`,
-    },
+{
+role: "system",
+content: [
+"تو یک تحلیلگر داده فارسی هستی.",
+"خروجی باید فقط یک JSON معتبر باشد.",
+"هیچ markdown، code fence، توضیح قبل یا بعد از JSON تولید نکن.",
+"هرگز کلیدهای خروجی را تغییر نده یا حذف نکن.",
+].join(" "),
+},
+{
+role: "user",
+content: `بر اساس داده‌های ترند زیر، خروجی را دقیقاً با این schema برگردان:
+
+{
+  "text": "string",
+  "sentiment": {
+"fear": 0,
+"excitement": 0,
+"crisis": 0,
+"sexualSignal": 0,
+"politicalTension": 0,
+"polarity": 0
+  }
+}
+
+تعریف شاخص‌ها:
+- fear: شدت نشانه‌های نگرانی، ناامنی یا اضطراب جمعی
+- excitement: شدت هیجان، امید یا اشتیاق جمعی
+- crisis: شدت نشانه‌های بحران، فوریت یا اختلال
+- sexualSignal: شدت حضور سیگنال‌های جنسی یا رابطه‌ای در داده
+- politicalTension: شدت تنش سیاسی در داده
+- polarity: شدت تضاد، دو‌قطبی‌شدن یا اختلاف دیدگاه‌ها
+
+قوانین:
+- همه کلیدها اجباری‌اند.
+- همه شاخص‌ها باید number و در بازه 0 تا 1 باشند.
+- text فارسی، حداکثر دو پاراگراف، مبتنی بر شواهد و غیراغراق‌آمیز باشد.
+- اگر داده ناکافی است، در text با احتیاط بیان کن؛ ولی همه کلیدهای JSON را حفظ کن.
+
+داده:
+${safeStringify(payload)}`,
+},
   ];
 }
+
 
 
 export function buildWomenSocialPrompt(payload: SourcePromptPayload): LLMMessage[] {

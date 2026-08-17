@@ -2,7 +2,6 @@ import { headers } from "next/headers";
 import { AnalyzeResponse, ClusteredItem } from "./lib/types";
 import PageClient from "./components/PageClient";
 
-
 async function getAnalysis(): Promise<AnalyzeResponse> {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host");
@@ -19,8 +18,7 @@ async function getAnalysis(): Promise<AnalyzeResponse> {
 
   const data = (await res.json()) as Partial<AnalyzeResponse>;
 
-  const hasUsableData =
-    Array.isArray(data.items) && data.items.length > 0;
+  const hasUsableData = Array.isArray(data.items) && data.items.length > 0;
 
   if (!hasUsableData) {
     throw new Error("no_usable_data");
@@ -44,21 +42,48 @@ async function getAnalysis(): Promise<AnalyzeResponse> {
     },
     labels: data.labels ?? {},
     reports: {
-      generalReport: data.reports?.generalReport || "تحلیلی دریافت نشد.",
+      generalReport: {
+        text: data.reports?.generalReport?.text ?? "تحلیلی دریافت نشد.",
+        sentiment: {
+          fear: data.reports?.generalReport?.sentiment?.fear ?? 0,
+          excitement: data.reports?.generalReport?.sentiment?.excitement ?? 0,
+          crisis: data.reports?.generalReport?.sentiment?.crisis ?? 0,
+          sexualSignal: data.reports?.generalReport?.sentiment?.sexualSignal ?? 0,
+          politicalTension: data.reports?.generalReport?.sentiment?.politicalTension ?? 0,
+          polarity: data.reports?.generalReport?.sentiment?.polarity ?? 0,
+        },
+      },
       womenSocialReport:
         data.reports?.womenSocialReport || "داده‌های اجتماعی در دسترس نیست.",
-      marketReport: data.reports?.marketReport || "داده‌های بازار در دسترس نیست.",
+      marketReport:
+        data.reports?.marketReport || "داده‌های بازار در دسترس نیست.",
     },
     sourceBreakdown: data.sourceBreakdown ?? {
-      google: 0, wiki: 0, ninisite: 0, karzar: 0, digikala: 0, tgstat: 0, filimo: 0,
+      google: 0,
+      wiki: 0,
+      ninisite: 0,
+      karzar: 0,
+      digikala: 0,
+      tgstat: 0,
+      filimo: 0,
     },
     status: data.status ?? {
-      google: "empty", wiki: "empty", ninisite: "empty", karzar: "empty",
-      digikala: "empty", tgstat: "empty", filimo: "empty",
+      google: "empty",
+      wiki: "empty",
+      ninisite: "empty",
+      karzar: "empty",
+      digikala: "empty",
+      tgstat: "empty",
+      filimo: "empty",
     },
     errors: data.errors ?? {
-      google: null, wiki: null, ninisite: null, karzar: null,
-      digikala: null, tgstat: null, filimo: null,
+      google: null,
+      wiki: null,
+      ninisite: null,
+      karzar: null,
+      digikala: null,
+      tgstat: null,
+      filimo: null,
     },
   };
 }
@@ -66,7 +91,5 @@ async function getAnalysis(): Promise<AnalyzeResponse> {
 export default async function Page() {
   const data = await getAnalysis();
 
-  return (
-    <PageClient data={data} />
-  );
+  return <PageClient data={data} />;
 }

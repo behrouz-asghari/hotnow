@@ -51,14 +51,27 @@ export async function GET() {
     const digikalaItems = fused.filter((x: RawTrendItem) => x.source === "digikala");
 
     const reports = await generateReports(
-      clustered, sentiment, forecast, labels, ninisiteItems, digikalaItems
+      clustered,
+      sentiment,
+      forecast,
+      labels,
+      ninisiteItems,
+      digikalaItems
     );
 
     // 6) Build response
     const data = buildAnalyzeResponse({
-      clustered, labels, sentiment, forecast,
-      reports: { generalReport: reports.generalReport, womenSocialReport: reports.womenSocialReport, marketReport: reports.marketReport },
-      sourceResults, sourceCounts: buildSourceCounts(sourceResults),
+      clustered,
+      labels,
+      sentiment,
+      forecast,
+      reports: {
+        generalReport: reports.generalReport,
+        womenSocialReport: reports.womenSocialReport,
+        marketReport: reports.marketReport,
+      },
+      sourceResults,
+      sourceCounts: buildSourceCounts(sourceResults),
       reportWarnings: reports.reportWarnings,
     });
 
